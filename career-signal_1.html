@@ -1,0 +1,2569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CareerSignal — Know Your Pull</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:ital,wght@0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+
+<style>
+/* ══════════════════════════════════════
+   TOKENS & RESET
+══════════════════════════════════════ */
+:root {
+  --bg:        #080810;
+  --surface:   rgba(255,255,255,0.045);
+  --surface-2: rgba(255,255,255,0.08);
+  --border:    rgba(255,255,255,0.10);
+  --border-2:  rgba(255,255,255,0.18);
+  --text:      #f0eeea;
+  --text-2:    rgba(240,238,234,0.60);
+  --text-3:    rgba(240,238,234,0.35);
+  --accent:    #7c6af7;
+  --accent-2:  #a78bfa;
+  --accent-glow: rgba(124,106,247,0.28);
+  --gold:      #f0c060;
+  --red:       #f87171;
+  --green:     #4ade80;
+  --r:         14px;
+  --r-lg:      22px;
+}
+
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+
+html { scroll-behavior:smooth; }
+
+body {
+  font-family: 'Instrument Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  font-size: 16px;
+  line-height: 1.6;
+  cursor: default;
+}
+
+/* ══════════════════════════════════════
+   BACKGROUND ORBS — ambient lighting
+══════════════════════════════════════ */
+.orb-wrap {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0;
+  animation: orbFloat 20s ease-in-out infinite;
+}
+.orb-1 { width:600px; height:600px; background:radial-gradient(circle, #7c6af7 0%, transparent 70%); top:-200px; left:-100px; opacity:0.15; animation-delay:0s; }
+.orb-2 { width:500px; height:500px; background:radial-gradient(circle, #06b6d4 0%, transparent 70%); bottom:-100px; right:-100px; opacity:0.10; animation-delay:-7s; }
+.orb-3 { width:400px; height:400px; background:radial-gradient(circle, #f0c060 0%, transparent 70%); top:50%; left:50%; transform:translate(-50%,-50%); opacity:0.07; animation-delay:-12s; }
+
+@keyframes orbFloat {
+  0%,100% { transform: translate(0,0); }
+  33% { transform: translate(30px,-20px); }
+  66% { transform: translate(-20px,30px); }
+}
+
+/* ══════════════════════════════════════
+   GLASS SURFACE
+══════════════════════════════════════ */
+.glass {
+  background: var(--surface);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+}
+.glass-2 {
+  background: var(--surface-2);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-2);
+  border-radius: var(--r);
+}
+
+/* ══════════════════════════════════════
+   LAYOUT WRAPPER
+══════════════════════════════════════ */
+.app-wrap {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+}
+
+/* ══════════════════════════════════════
+   HEADER / NAV
+══════════════════════════════════════ */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 1.1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(8,8,16,0.6);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--border);
+  transition: all 0.3s;
+}
+
+.logo {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--text);
+}
+.logo .logo-dot { color: var(--accent-2); }
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+/* Pill progress */
+.progress-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0.9rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  font-size: 0.78rem;
+  color: var(--text-2);
+  letter-spacing: 0.04em;
+  transition: all 0.4s;
+}
+.progress-pill .pip {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  flex-shrink: 0;
+}
+#nav-progress-bar {
+  width: 80px; height: 2px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+#nav-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  border-radius: 2px;
+  width: 0%;
+  transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ══════════════════════════════════════
+   SCREENS
+══════════════════════════════════════ */
+.screen {
+  display: none;
+  min-height: 100vh;
+  padding-top: 80px;
+}
+.screen.active {
+  display: flex;
+  flex-direction: column;
+  animation: screenIn 0.55s cubic-bezier(0.22,1,0.36,1);
+}
+@keyframes screenIn {
+  from { opacity:0; transform:translateY(24px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* ══════════════════════════════════════
+   ① HERO / LANDING
+══════════════════════════════════════ */
+#screen-hero {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 80px 2rem 4rem;
+}
+
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 1rem;
+  background: rgba(124,106,247,0.12);
+  border: 1px solid rgba(124,106,247,0.3);
+  border-radius: 100px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--accent-2);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+  animation: fadeUp 0.6s 0.1s both;
+}
+.hero-eyebrow .dot { width:5px; height:5px; border-radius:50%; background:var(--accent-2); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+.hero-h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(3rem, 7vw, 6rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -2px;
+  margin-bottom: 1.5rem;
+  animation: fadeUp 0.6s 0.2s both;
+}
+.hero-h1 em {
+  font-style: italic;
+  font-family: 'Instrument Serif', serif;
+  background: linear-gradient(135deg, var(--accent-2), #c4b5fd, var(--gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-sub {
+  max-width: 520px;
+  margin: 0 auto 3rem;
+  font-size: 1.1rem;
+  color: var(--text-2);
+  line-height: 1.7;
+  animation: fadeUp 0.6s 0.3s both;
+}
+
+.hero-cta {
+  animation: fadeUp 0.6s 0.4s both;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 4rem;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.95rem 2rem;
+  background: linear-gradient(135deg, var(--accent), #9d8bf7);
+  border: none;
+  border-radius: 100px;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: white;
+  cursor: pointer;
+  transition: all 0.25s;
+  box-shadow: 0 0 30px var(--accent-glow);
+  white-space: nowrap;
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 50px rgba(124,106,247,0.5);
+}
+.btn-primary:active { transform:translateY(0); }
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.95rem 2rem;
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  border-radius: 100px;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all 0.25s;
+  white-space: nowrap;
+  backdrop-filter: blur(10px);
+}
+.btn-ghost:hover {
+  border-color: rgba(255,255,255,0.3);
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+/* Feature cards row */
+.hero-features {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  animation: fadeUp 0.6s 0.5s both;
+  max-width: 900px;
+  width: 100%;
+}
+
+.feat-card {
+  flex: 1;
+  min-width: 200px;
+  max-width: 260px;
+  padding: 1.4rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  backdrop-filter: blur(16px);
+  text-align: left;
+  transition: all 0.3s;
+}
+.feat-card:hover {
+  border-color: rgba(124,106,247,0.3);
+  background: rgba(124,106,247,0.06);
+  transform: translateY(-4px);
+}
+.feat-icon {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  background: rgba(124,106,247,0.15);
+  border: 1px solid rgba(124,106,247,0.25);
+  display: flex; align-items:center; justify-content:center;
+  font-size: 1rem;
+  margin-bottom: 0.9rem;
+}
+.feat-title { font-family:'Syne',sans-serif; font-size:0.9rem; font-weight:700; margin-bottom:0.35rem; color:var(--text); }
+.feat-desc { font-size:0.8rem; color:var(--text-2); line-height:1.5; }
+
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(20px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* ══════════════════════════════════════
+   SHARED FORM LAYOUT
+══════════════════════════════════════ */
+.form-shell {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1.5rem 5rem;
+  max-width: 680px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.step-header {
+  width: 100%;
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+.step-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent-2);
+  margin-bottom: 0.8rem;
+}
+.step-label-num {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: rgba(124,106,247,0.2);
+  border: 1px solid rgba(124,106,247,0.4);
+  font-size: 0.65rem;
+  display: flex; align-items:center; justify-content:center;
+  font-weight: 700;
+}
+.step-h {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  font-weight: 800;
+  letter-spacing: -0.8px;
+  line-height: 1.2;
+  color: var(--text);
+  margin-bottom: 0.6rem;
+}
+.step-h em { font-family:'Instrument Serif',serif; font-style:italic; color:var(--accent-2); }
+.step-sub {
+  font-size: 0.95rem;
+  color: var(--text-2);
+  line-height: 1.6;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* ══════════════════════════════════════
+   ② RESUME UPLOAD
+══════════════════════════════════════ */
+.upload-zone {
+  width: 100%;
+  padding: 3.5rem 2.5rem;
+  border: 2px dashed var(--border-2);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  backdrop-filter: blur(16px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+.upload-zone::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(124,106,247,0.04) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.upload-zone:hover::before, .upload-zone.dragover::before { opacity: 1; }
+.upload-zone:hover, .upload-zone.dragover {
+  border-color: rgba(124,106,247,0.5);
+  background: rgba(124,106,247,0.06);
+  transform: translateY(-2px);
+}
+.upload-zone.has-file {
+  border-color: rgba(74,222,128,0.4);
+  background: rgba(74,222,128,0.05);
+  cursor: default;
+}
+.upload-zone.has-file::before { display: none; }
+
+.upload-icon {
+  width: 64px; height: 64px;
+  border-radius: 16px;
+  background: rgba(124,106,247,0.12);
+  border: 1px solid rgba(124,106,247,0.25);
+  display: flex; align-items:center; justify-content:center;
+  font-size: 1.8rem;
+  margin-bottom: 1.2rem;
+  transition: all 0.3s;
+}
+.upload-zone:hover .upload-icon { transform: scale(1.08); }
+
+.upload-title { font-family:'Syne',sans-serif; font-size:1.05rem; font-weight:700; color:var(--text); margin-bottom:0.4rem; }
+.upload-sub { font-size:0.85rem; color:var(--text-2); margin-bottom:0.3rem; }
+.upload-types { font-size:0.75rem; color:var(--text-3); letter-spacing:0.04em; }
+
+#resume-file { display:none; }
+
+/* File preview */
+.file-preview {
+  display: none;
+  width: 100%;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.4rem;
+  background: rgba(74,222,128,0.07);
+  border: 1px solid rgba(74,222,128,0.2);
+  border-radius: var(--r);
+  margin-top: 1.25rem;
+}
+.file-preview.visible { display: flex; animation: fadeUp 0.3s ease; }
+.file-icon-wrap {
+  width: 40px; height: 40px;
+  border-radius: 8px;
+  background: rgba(74,222,128,0.15);
+  display: flex; align-items:center; justify-content:center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+.file-info { flex:1; min-width:0; }
+.file-name { font-size:0.88rem; font-weight:500; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.file-size { font-size:0.76rem; color:var(--text-3); }
+.file-remove {
+  background: none; border: none;
+  color: var(--text-3);
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 0.3rem;
+  border-radius: 4px;
+  transition: color 0.2s;
+  flex-shrink: 0;
+}
+.file-remove:hover { color: var(--red); }
+
+.upload-alt {
+  width:100%;
+  margin-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.upload-alt-line { flex:1; height:1px; background:var(--border); }
+.upload-alt-text { font-size:0.78rem; color:var(--text-3); }
+
+.skip-note {
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.9rem 1.2rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  font-size: 0.82rem;
+  color: var(--text-2);
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* Resume context preview */
+.resume-parsed {
+  display: none;
+  width: 100%;
+  margin-top: 1.5rem;
+  padding: 1.2rem 1.5rem;
+  background: rgba(124,106,247,0.07);
+  border: 1px solid rgba(124,106,247,0.2);
+  border-radius: var(--r);
+}
+.resume-parsed.visible { display: block; animation: fadeUp 0.4s ease; }
+.parsed-label { font-size:0.7rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--accent-2); font-weight:600; margin-bottom:0.6rem; }
+.parsed-chips { display:flex; flex-wrap:wrap; gap:0.4rem; }
+.parsed-chip {
+  padding: 0.25rem 0.65rem;
+  background: rgba(124,106,247,0.12);
+  border: 1px solid rgba(124,106,247,0.22);
+  border-radius: 100px;
+  font-size: 0.75rem;
+  color: var(--accent-2);
+}
+
+/* ══════════════════════════════════════
+   QUESTION CARDS
+══════════════════════════════════════ */
+.q-card {
+  width: 100%;
+  padding: 1.6rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  backdrop-filter: blur(16px);
+  margin-bottom: 1rem;
+  transition: border-color 0.25s;
+}
+.q-card:focus-within { border-color: rgba(124,106,247,0.4); }
+
+.q-num {
+  font-family: 'Instrument Sans', monospace;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-3);
+  margin-bottom: 0.4rem;
+}
+.q-text {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 0.25rem;
+  line-height: 1.5;
+}
+.q-hint {
+  font-size: 0.8rem;
+  color: var(--text-3);
+  font-style: italic;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+/* Textarea */
+.q-textarea {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 0.92rem;
+  color: var(--text);
+  resize: vertical;
+  min-height: 88px;
+  transition: all 0.2s;
+  line-height: 1.6;
+}
+.q-textarea::placeholder { color: var(--text-3); }
+.q-textarea:focus { outline:none; border-color: rgba(124,106,247,0.5); background:rgba(124,106,247,0.05); }
+
+/* Input */
+.q-input {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 0.95rem;
+  color: var(--text);
+  transition: all 0.2s;
+}
+.q-input::placeholder { color: var(--text-3); }
+.q-input:focus { outline:none; border-color: rgba(124,106,247,0.5); background:rgba(124,106,247,0.05); }
+
+/* Radio options */
+.radio-stack { display:flex; flex-direction:column; gap:0.5rem; }
+.radio-row { display:flex; flex-direction:row; gap:0.5rem; flex-wrap:wrap; }
+
+.r-opt {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  padding: 0.85rem 1rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.18s;
+  user-select: none;
+}
+.r-opt:hover { border-color: rgba(124,106,247,0.35); background: rgba(124,106,247,0.05); }
+.r-opt.sel {
+  border-color: rgba(124,106,247,0.6);
+  background: rgba(124,106,247,0.10);
+}
+.r-opt input { display:none; }
+.r-bullet {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--border-2);
+  flex-shrink: 0;
+  margin-top: 1px;
+  display: flex; align-items:center; justify-content:center;
+  transition: all 0.18s;
+}
+.r-opt.sel .r-bullet {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+.r-opt.sel .r-bullet::after {
+  content: '';
+  width: 7px; height: 7px;
+  background: white;
+  border-radius: 50%;
+  display: block;
+}
+.r-label-main { font-size:0.92rem; font-weight:500; color:var(--text); display:block; line-height:1.4; }
+.r-label-sub { font-size:0.78rem; color:var(--text-3); display:block; margin-top:0.15rem; }
+
+/* Row radio (tradeoffs) */
+.radio-row .r-opt { flex:1; min-width:140px; flex-direction:column; gap:0.4rem; text-align:center; align-items:center; }
+.radio-row .r-bullet { margin-top:0; }
+
+/* Checkbox options */
+.c-opt {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  padding: 0.85rem 1rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.18s;
+  user-select: none;
+}
+.c-opt:hover { border-color: rgba(124,106,247,0.35); background: rgba(124,106,247,0.05); }
+.c-opt.sel {
+  border-color: rgba(124,106,247,0.6);
+  background: rgba(124,106,247,0.10);
+}
+.c-box {
+  width: 18px; height: 18px;
+  border-radius: 4px;
+  border: 2px solid var(--border-2);
+  flex-shrink: 0;
+  margin-top: 1px;
+  display: flex; align-items:center; justify-content:center;
+  transition: all 0.18s;
+}
+.c-opt.sel .c-box {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+.c-opt.sel .c-box::after {
+  content: '✓';
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+/* Scale */
+.scale-row { display:flex; gap:0.4rem; }
+.scale-btn {
+  flex:1;
+  padding: 0.7rem 0.5rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all 0.18s;
+  text-align: center;
+}
+.scale-btn:hover { border-color: rgba(124,106,247,0.4); color:var(--text); background:rgba(124,106,247,0.06); }
+.scale-btn.sel { background: rgba(124,106,247,0.2); border-color: rgba(124,106,247,0.6); color:var(--accent-2); }
+.scale-labels { display:flex; justify-content:space-between; margin-top:0.35rem; font-size:0.72rem; color:var(--text-3); padding:0 2px; }
+
+/* Rank selects */
+.rank-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 1rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  transition: border-color 0.2s;
+}
+.rank-item:focus-within { border-color: rgba(124,106,247,0.4); }
+.rank-num { font-size:0.75rem; color:var(--text-3); min-width:22px; font-weight:600; }
+.rank-select {
+  flex:1;
+  background: transparent;
+  border: none;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 0.92rem;
+  color: var(--text);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.rank-select:focus { outline:none; }
+.rank-select option { background: #1a1a2e; color: var(--text); }
+
+/* ══════════════════════════════════════
+   TWO COLUMN
+══════════════════════════════════════ */
+.two-col { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+@media(max-width:560px){ .two-col { grid-template-columns:1fr; } }
+
+/* ══════════════════════════════════════
+   NAV ROW
+══════════════════════════════════════ */
+.nav-row {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2rem;
+  gap: 1rem;
+}
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1.4rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 0.88rem;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-back:hover { border-color:var(--border-2); color:var(--text); }
+
+.btn-next {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.8rem;
+  background: linear-gradient(135deg, var(--accent), #9d8bf7);
+  border: none;
+  border-radius: 100px;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: white;
+  cursor: pointer;
+  transition: all 0.25s;
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+.btn-next:hover { transform:translateY(-1px); box-shadow:0 0 35px rgba(124,106,247,0.45); }
+.btn-next:active { transform:translateY(0); }
+.btn-next.btn-submit { background:linear-gradient(135deg, var(--gold), #f0a020); box-shadow:0 0 24px rgba(240,192,96,0.3); }
+.btn-next.btn-submit:hover { box-shadow:0 0 40px rgba(240,192,96,0.5); }
+
+/* ══════════════════════════════════════
+   SECTION DIVIDER
+══════════════════════════════════════ */
+.section-divider {
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  margin: 1.5rem 0 1rem;
+}
+.divider-line { flex:1; height:1px; background:var(--border); }
+.divider-text { font-size:0.72rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-3); }
+
+/* ══════════════════════════════════════
+   LOADING SCREEN
+══════════════════════════════════════ */
+#screen-loading {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.loading-inner {
+  max-width: 420px;
+  width: 100%;
+  padding: 0 2rem;
+}
+
+.loading-orb {
+  width: 100px; height: 100px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, var(--accent-2), var(--accent));
+  margin: 0 auto 2rem;
+  position: relative;
+  animation: orbPulse 2s ease-in-out infinite;
+  box-shadow: 0 0 60px var(--accent-glow);
+}
+.loading-orb::after {
+  content:'';
+  position:absolute;
+  inset:-8px;
+  border-radius:50%;
+  border:2px solid rgba(124,106,247,0.2);
+  animation: orbRing 2s ease-in-out infinite;
+}
+@keyframes orbPulse { 0%,100%{transform:scale(1); box-shadow:0 0 60px var(--accent-glow);} 50%{transform:scale(1.05); box-shadow:0 0 80px rgba(124,106,247,0.5);} }
+@keyframes orbRing { 0%{transform:scale(1); opacity:0.8;} 100%{transform:scale(1.6); opacity:0;} }
+
+.loading-h { font-family:'Syne',sans-serif; font-size:1.6rem; font-weight:800; letter-spacing:-0.5px; color:var(--text); margin-bottom:0.5rem; }
+.loading-sub { font-size:0.9rem; color:var(--text-2); margin-bottom:2.5rem; }
+
+.load-steps { display:flex; flex-direction:column; gap:0.6rem; text-align:left; }
+.load-step {
+  display:flex; align-items:center; gap:0.9rem;
+  padding: 0.8rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size:0.85rem;
+  color:var(--text-3);
+  transition: all 0.4s;
+  opacity: 0;
+}
+.load-step.show { opacity:1; color:var(--text-2); }
+.load-step.done { border-color:rgba(74,222,128,0.3); background:rgba(74,222,128,0.06); color:var(--green); }
+.step-bullet {
+  width:20px; height:20px;
+  border-radius:50%;
+  border:2px solid var(--border-2);
+  flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:0.65rem;
+  font-weight:700;
+  color:var(--text-3);
+  transition: all 0.3s;
+}
+.load-step.done .step-bullet {
+  background: var(--green);
+  border-color: var(--green);
+  color: #022c22;
+}
+.load-step.active .step-bullet {
+  border-color: var(--accent-2);
+  animation: stepSpin 1s linear infinite;
+}
+@keyframes stepSpin { to { transform:rotate(360deg); } }
+
+/* ══════════════════════════════════════
+   RESULT SCREEN
+══════════════════════════════════════ */
+#screen-result {
+  align-items: center;
+  padding: 80px 1.5rem 5rem;
+}
+
+.result-wrap {
+  max-width: 700px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.result-hero {
+  text-align: center;
+  margin-bottom: 2.5rem;
+  padding: 3rem 2rem;
+  background: linear-gradient(135deg, rgba(124,106,247,0.08) 0%, rgba(167,139,250,0.06) 50%, rgba(240,192,96,0.05) 100%);
+  border: 1px solid rgba(124,106,247,0.2);
+  border-radius: var(--r-lg);
+  backdrop-filter: blur(20px);
+  position: relative;
+  overflow: hidden;
+}
+.result-hero::before {
+  content:'';
+  position:absolute;
+  top:-40px; left:-40px;
+  width:200px; height:200px;
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(124,106,247,0.2) 0%, transparent 70%);
+  pointer-events:none;
+}
+.result-hero::after {
+  content:'';
+  position:absolute;
+  bottom:-40px; right:-40px;
+  width:200px; height:200px;
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(240,192,96,0.15) 0%, transparent 70%);
+  pointer-events:none;
+}
+.result-eyebrow { font-size:0.72rem; text-transform:uppercase; letter-spacing:0.12em; color:var(--accent-2); font-weight:600; margin-bottom:0.75rem; }
+.result-h { font-family:'Syne',sans-serif; font-size:1.9rem; font-weight:800; letter-spacing:-0.5px; color:var(--text); margin-bottom:0.5rem; }
+.result-sub { font-size:0.9rem; color:var(--text-2); }
+
+.conf-badge {
+  display:inline-flex; align-items:center; gap:0.4rem;
+  padding:0.3rem 0.8rem;
+  border-radius:100px;
+  font-size:0.75rem;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:0.06em;
+  margin-top:1rem;
+}
+.conf-high { background:rgba(74,222,128,0.12); border:1px solid rgba(74,222,128,0.25); color:var(--green); }
+.conf-medium { background:rgba(240,192,96,0.12); border:1px solid rgba(240,192,96,0.25); color:var(--gold); }
+.conf-low { background:rgba(248,113,113,0.12); border:1px solid rgba(248,113,113,0.25); color:var(--red); }
+
+/* Profile sections */
+.profile-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 1.6rem;
+  margin-bottom: 1rem;
+  backdrop-filter: blur(16px);
+}
+
+.section-head {
+  display:flex; align-items:center; gap:0.6rem;
+  margin-bottom:1.1rem;
+}
+.section-head-label {
+  font-size:0.7rem;
+  text-transform:uppercase;
+  letter-spacing:0.1em;
+  color:var(--accent-2);
+  font-weight:600;
+  flex:1;
+}
+.section-head::after { content:''; flex:1; height:1px; background:var(--border); }
+
+/* Signal items */
+.signal-item {
+  display:flex; align-items:flex-start; gap:0.9rem;
+  padding:0.8rem;
+  background:rgba(255,255,255,0.025);
+  border-radius:8px;
+  margin-bottom:0.5rem;
+}
+.signal-item:last-child { margin-bottom:0; }
+.sig-dots { display:flex; gap:3px; flex-shrink:0; padding-top:3px; }
+.sig-dot { width:7px; height:7px; border-radius:50%; background:var(--border); transition:background 0.2s; }
+.sig-dot.on { background:var(--accent-2); box-shadow:0 0 6px var(--accent-glow); }
+.sig-content { flex:1; min-width:0; }
+.sig-name { font-size:0.92rem; font-weight:500; color:var(--text); margin-bottom:0.2rem; }
+.sig-ev { font-size:0.8rem; color:var(--text-2); line-height:1.5; }
+
+/* Tag pills */
+.tag-wrap { display:flex; flex-wrap:wrap; gap:0.4rem; }
+.tag { padding:0.25rem 0.7rem; border-radius:100px; font-size:0.78rem; font-weight:500; }
+.tag-green { background:rgba(74,222,128,0.1); border:1px solid rgba(74,222,128,0.2); color:var(--green); }
+.tag-red { background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.2); color:var(--red); }
+.tag-purple { background:rgba(124,106,247,0.12); border:1px solid rgba(124,106,247,0.25); color:var(--accent-2); }
+.tag-gold { background:rgba(240,192,96,0.1); border:1px solid rgba(240,192,96,0.2); color:var(--gold); }
+.tag-dim { background:rgba(255,255,255,0.04); border:1px solid var(--border); color:var(--text-2); }
+
+/* Behavior grid */
+.beh-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; }
+@media(max-width:560px){ .beh-grid { grid-template-columns:1fr; } }
+.beh-item { background:rgba(255,255,255,0.025); border-radius:8px; padding:0.75rem 1rem; }
+.beh-key { font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-3); margin-bottom:0.3rem; font-weight:500; }
+.beh-val { font-size:0.9rem; font-weight:500; color:var(--text); text-transform:capitalize; }
+
+/* Motivation items */
+.motiv-item { padding:0.8rem; background:rgba(255,255,255,0.025); border-radius:8px; margin-bottom:0.5rem; }
+.motiv-item:last-child { margin-bottom:0; }
+.motiv-driver { font-size:0.92rem; font-weight:500; color:var(--text); margin-bottom:0.2rem; }
+.motiv-ev { font-size:0.8rem; color:var(--text-2); line-height:1.5; }
+
+/* Avoid items */
+.avoid-item { padding:0.8rem 0.8rem 0.8rem 1rem; background:rgba(255,255,255,0.025); border-left:2px solid rgba(248,113,113,0.4); border-radius:0 8px 8px 0; margin-bottom:0.5rem; }
+.avoid-item:last-child { margin-bottom:0; }
+.avoid-sig { font-size:0.92rem; font-weight:500; color:var(--red); margin-bottom:0.2rem; }
+.avoid-ev { font-size:0.8rem; color:var(--text-2); line-height:1.5; }
+
+/* Constraint rows */
+.con-row { display:flex; justify-content:space-between; align-items:center; padding:0.7rem 0; border-bottom:1px solid var(--border); font-size:0.88rem; }
+.con-row:last-child { border-bottom:none; }
+.con-key { color:var(--text-2); }
+.con-val { font-weight:500; color:var(--text); }
+
+/* Tradeoff grid */
+.trade-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+@media(max-width:560px){ .trade-grid { grid-template-columns:1fr; } }
+.trade-col-head { font-size:0.72rem; text-transform:uppercase; letter-spacing:0.08em; font-weight:600; margin-bottom:0.5rem; }
+.trade-green { color:var(--green); }
+.trade-red { color:var(--red); }
+
+/* Assumptions */
+.assum-list { list-style:none; display:flex; flex-direction:column; gap:0.4rem; }
+.assum-list li { display:flex; gap:0.6rem; font-size:0.85rem; color:var(--text-2); line-height:1.5; }
+.assum-list li::before { content:'→'; color:var(--accent-2); flex-shrink:0; font-size:0.8rem; margin-top:0.1rem; }
+
+/* JSON block */
+.json-wrap {
+  background: rgba(0,0,0,0.6);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 1.4rem;
+  overflow-x: auto;
+  position: relative;
+  backdrop-filter: blur(10px);
+}
+.json-wrap pre { font-family:'Courier New',monospace; font-size:0.73rem; color:#c8c3bb; line-height:1.7; white-space:pre-wrap; word-break:break-word; }
+.jk { color:#c084fc; }   /* key */
+.js { color:#86efac; }   /* string */
+.jn { color:#67e8f9; }   /* number */
+.jb { color:#fbbf24; }   /* bool/null */
+
+.copy-json-btn {
+  position:absolute; top:0.8rem; right:0.8rem;
+  padding:0.35rem 0.75rem;
+  background:rgba(255,255,255,0.07);
+  border:1px solid var(--border-2);
+  border-radius:6px;
+  font-size:0.72rem;
+  color:var(--text-2);
+  font-family:'Instrument Sans',sans-serif;
+  cursor:pointer;
+  transition:all 0.2s;
+}
+.copy-json-btn:hover { background:rgba(255,255,255,0.12); color:var(--text); }
+
+.result-actions {
+  display:flex; gap:1rem; flex-wrap:wrap; margin-top:2rem; justify-content:center;
+}
+
+/* ══════════════════════════════════════
+   STEP COUNTER DOTS
+══════════════════════════════════════ */
+.step-dots {
+  display:flex; gap:0.4rem; justify-content:center;
+  margin-bottom:2rem;
+}
+.s-dot {
+  width:6px; height:6px;
+  border-radius:50%;
+  background: var(--border-2);
+  transition: all 0.3s;
+}
+.s-dot.active { width:22px; border-radius:3px; background:var(--accent); }
+.s-dot.done { background:var(--accent-2); opacity:0.6; }
+
+/* Error state */
+.err-box {
+  width:100%;
+  padding:1rem 1.25rem;
+  background:rgba(248,113,113,0.08);
+  border:1px solid rgba(248,113,113,0.2);
+  border-radius:var(--r);
+  color:var(--red);
+  font-size:0.88rem;
+  margin-top:1rem;
+  line-height:1.5;
+}
+
+/* Section label badge */
+.section-badge {
+  display:inline-flex; align-items:center; gap:0.5rem;
+  padding:0.3rem 0.8rem;
+  background:rgba(124,106,247,0.1);
+  border:1px solid rgba(124,106,247,0.2);
+  border-radius:100px;
+  font-size:0.7rem;
+  color:var(--accent-2);
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:0.08em;
+  margin-bottom:1.5rem;
+}
+
+/* Tooltip */
+.tooltip {
+  position:relative; display:inline-block;
+}
+.tooltip-text {
+  visibility:hidden; opacity:0;
+  position:absolute; bottom:125%; left:50%; transform:translateX(-50%);
+  background:#1a1a2e; border:1px solid var(--border-2);
+  color:var(--text-2); font-size:0.75rem;
+  padding:0.4rem 0.7rem; border-radius:6px;
+  white-space:nowrap;
+  transition:opacity 0.2s;
+  pointer-events:none;
+  z-index:10;
+}
+.tooltip:hover .tooltip-text { visibility:visible; opacity:1; }
+
+/* Responsive */
+@media(max-width:480px) {
+  .hero-h1 { font-size:2.4rem; }
+  .form-shell { padding:1.5rem 1rem 4rem; }
+  .q-card { padding:1.2rem; }
+  .two-col { grid-template-columns:1fr; }
+  .scale-row { gap:0.25rem; }
+}
+
+/* Smooth hide/show transition for screens */
+.screen-slide-out {
+  animation: slideOut 0.3s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+@keyframes slideOut {
+  to { opacity:0; transform:translateY(-16px); }
+}
+
+/* ══════════════════════════════════════
+   API KEY SCREEN
+══════════════════════════════════════ */
+.apikey-wrap {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.apikey-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  padding: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.key-input-wrap {
+  position: relative;
+  margin-top: 0.75rem;
+}
+
+.key-input {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 0.95rem 3rem 0.95rem 1.1rem;
+  font-family: 'Instrument Sans', monospace;
+  font-size: 0.88rem;
+  color: var(--text);
+  letter-spacing: 0.04em;
+  transition: all 0.2s;
+}
+.key-input::placeholder { color: var(--text-3); letter-spacing: 0; font-family: 'Instrument Sans', sans-serif; }
+.key-input:focus { outline: none; border-color: rgba(124,106,247,0.6); background: rgba(124,106,247,0.05); }
+.key-input.valid { border-color: rgba(74,222,128,0.5); background: rgba(74,222,128,0.04); }
+.key-input.invalid { border-color: rgba(248,113,113,0.5); background: rgba(248,113,113,0.04); }
+
+.key-toggle {
+  position: absolute;
+  right: 0.9rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-3);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.25rem;
+  line-height: 1;
+  transition: color 0.2s;
+}
+.key-toggle:hover { color: var(--text-2); }
+
+.key-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+  min-height: 1.2rem;
+  transition: all 0.3s;
+}
+.key-status.valid { color: var(--green); }
+.key-status.invalid { color: var(--red); }
+.key-status.idle { color: var(--text-3); }
+
+.privacy-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+.privacy-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.75rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  font-size: 0.74rem;
+  color: var(--text-2);
+}
+.privacy-pill .pp-icon { font-size: 0.8rem; }
+
+.get-key-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  color: var(--accent-2);
+  text-decoration: none;
+  margin-top: 1rem;
+  transition: opacity 0.2s;
+}
+.get-key-link:hover { opacity: 0.75; }
+
+.key-saved-badge {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  background: rgba(74,222,128,0.08);
+  border: 1px solid rgba(74,222,128,0.2);
+  border-radius: 8px;
+  font-size: 0.82rem;
+  color: var(--green);
+  margin-top: 0.75rem;
+}
+.key-saved-badge.show { display: flex; animation: fadeUp 0.3s ease; }
+</style>
+</head>
+<body>
+
+<!-- AMBIENT ORBS -->
+<div class="orb-wrap">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="logo">Career<span class="logo-dot">·</span>Signal</div>
+  <div class="nav-right">
+    <div class="progress-pill" id="nav-pill" style="display:none">
+      <div class="pip"></div>
+      <span id="nav-step-label">Resume</span>
+      <div id="nav-progress-bar"><div id="nav-progress-fill"></div></div>
+    </div>
+  </div>
+</nav>
+
+<div class="app-wrap">
+
+<!-- ════════════════════════
+     SCREEN: HERO
+════════════════════════ -->
+<div class="screen active" id="screen-hero">
+  <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2rem 1.5rem 4rem; text-align:center;">
+
+    <div class="hero-eyebrow">
+      <div class="dot"></div>
+      AI-Powered Career Signal Engine
+    </div>
+
+    <h1 class="hero-h1">
+      Discover what<br>
+      actually <em>drives</em> you
+    </h1>
+
+    <p class="hero-sub">
+      Not a personality quiz. A behavioral signal extraction engine — 
+      the same depth used in professional career intelligence. 
+      Upload your resume, answer 21 targeted questions, get a grounded profile.
+    </p>
+
+    <div class="hero-cta">
+      <button class="btn-primary" onclick="userApiKey ? goTo('screen-resume') : goTo('screen-apikey')">
+        Start your analysis
+        <svg width="16" height="16" fill="none" viewBox="0 0 16 16"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="btn-ghost" onclick="document.getElementById('how-it-works').scrollIntoView({behavior:'smooth'})">
+        How it works
+      </button>
+    </div>
+
+    <div class="hero-features">
+      <div class="feat-card">
+        <div class="feat-icon">📄</div>
+        <div class="feat-title">Resume context</div>
+        <div class="feat-desc">Upload your CV so the AI can anchor signals to your real experience</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🧠</div>
+        <div class="feat-title">Behavioral signals</div>
+        <div class="feat-desc">21 questions designed to surface what you actually feel, not what sounds good</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">⚡</div>
+        <div class="feat-title">Instant profile</div>
+        <div class="feat-desc">Structured JSON output — interest signals, avoidances, constraints, tradeoffs</div>
+      </div>
+    </div>
+
+    <div id="how-it-works" style="margin-top:5rem; max-width:640px; width:100%; text-align:left;">
+      <div class="section-badge">How it works</div>
+      <div style="display:flex; flex-direction:column; gap:1rem;">
+        <div class="q-card" style="display:flex; gap:1.2rem; align-items:flex-start;">
+          <div style="width:32px; height:32px; border-radius:8px; background:rgba(124,106,247,0.15); border:1px solid rgba(124,106,247,0.25); display:flex; align-items:center; justify-content:center; font-family:'Syne',sans-serif; font-weight:800; font-size:0.85rem; color:var(--accent-2); flex-shrink:0;">1</div>
+          <div><div style="font-weight:600; color:var(--text); margin-bottom:0.2rem;">Upload your resume</div><div style="font-size:0.85rem; color:var(--text-2);">PDF or text. The AI reads your background to contextualize every answer you give.</div></div>
+        </div>
+        <div class="q-card" style="display:flex; gap:1.2rem; align-items:flex-start;">
+          <div style="width:32px; height:32px; border-radius:8px; background:rgba(124,106,247,0.15); border:1px solid rgba(124,106,247,0.25); display:flex; align-items:center; justify-content:center; font-family:'Syne',sans-serif; font-weight:800; font-size:0.85rem; color:var(--accent-2); flex-shrink:0;">2</div>
+          <div><div style="font-weight:600; color:var(--text); margin-bottom:0.2rem;">Answer 21 behavioral questions</div><div style="font-size:0.85rem; color:var(--text-2);">Structured across 6 dimensions: context, energy, behavior, motivation, tradeoffs & constraints.</div></div>
+        </div>
+        <div class="q-card" style="display:flex; gap:1.2rem; align-items:flex-start;">
+          <div style="width:32px; height:32px; border-radius:8px; background:rgba(124,106,247,0.15); border:1px solid rgba(124,106,247,0.25); display:flex; align-items:center; justify-content:center; font-family:'Syne',sans-serif; font-weight:800; font-size:0.85rem; color:var(--accent-2); flex-shrink:0;">3</div>
+          <div><div style="font-weight:600; color:var(--text); margin-bottom:0.2rem;">Get your career signal profile</div><div style="font-size:0.85rem; color:var(--text-2);">Grounded, evidence-backed signals — not horoscope career advice. No job suggestions, just truth.</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════
+     SCREEN: API KEY
+════════════════════════ -->
+<div class="screen" id="screen-apikey">
+  <div class="form-shell">
+
+    <div class="step-dots">
+      <div class="s-dot active"></div>
+      <div class="s-dot"></div><div class="s-dot"></div><div class="s-dot"></div>
+      <div class="s-dot"></div><div class="s-dot"></div><div class="s-dot"></div><div class="s-dot"></div>
+    </div>
+
+    <div class="step-header">
+      <div class="step-label">
+        <div class="step-label-num">0</div>
+        One-time setup
+      </div>
+      <h2 class="step-h">Your Anthropic <em>API key</em></h2>
+      <p class="step-sub">CareerSignal uses Claude AI to analyze your responses. Your key is never sent anywhere except directly to Anthropic — it lives only in your browser tab.</p>
+    </div>
+
+    <div class="apikey-wrap">
+      <div class="apikey-card">
+
+        <div style="font-size:0.88rem; font-weight:500; color:var(--text); margin-bottom:0.3rem;">Paste your API key</div>
+        <div style="font-size:0.8rem; color:var(--text-2); margin-bottom:0.75rem;">Starts with <code style="background:rgba(255,255,255,0.06); padding:0.1rem 0.4rem; border-radius:4px; font-size:0.78rem; color:var(--accent-2);">sk-ant-</code></div>
+
+        <div class="key-input-wrap">
+          <input
+            type="password"
+            class="key-input"
+            id="api-key-input"
+            placeholder="sk-ant-api03-..."
+            oninput="validateKey(this)"
+            onpaste="setTimeout(()=>validateKey(this),10)"
+            autocomplete="off"
+            spellcheck="false"
+          >
+          <button class="key-toggle" onclick="toggleKeyVisibility()" id="key-toggle-btn" title="Show/hide key">👁</button>
+        </div>
+
+        <div class="key-status idle" id="key-status">
+          <span id="key-status-text">Enter your key to continue</span>
+        </div>
+
+        <div class="key-saved-badge" id="key-saved-badge">
+          <span>✓</span> Key saved for this session only — cleared when you close the tab
+        </div>
+
+        <div class="privacy-pills">
+          <div class="privacy-pill"><span class="pp-icon">🔒</span> Never stored or logged</div>
+          <div class="privacy-pill"><span class="pp-icon">💨</span> Cleared on tab close</div>
+          <div class="privacy-pill"><span class="pp-icon">🎯</span> Sent only to Anthropic</div>
+          <div class="privacy-pill"><span class="pp-icon">👁</span> Not visible in URL</div>
+        </div>
+
+        <div>
+          <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener" class="get-key-link">
+            Get a free API key from console.anthropic.com →
+          </a>
+        </div>
+
+      </div>
+
+      <div style="padding:1rem 1.2rem; background:rgba(240,192,96,0.06); border:1px solid rgba(240,192,96,0.15); border-radius:var(--r); font-size:0.82rem; color:rgba(240,192,96,0.8); line-height:1.6;">
+        <strong style="color:var(--gold);">Sharing with friends?</strong> Each person needs their own API key. Usage costs are tiny — typically a few cents per analysis. New accounts get free credits.
+      </div>
+
+      <div class="nav-row">
+        <button class="btn-back" onclick="goTo('screen-hero')">← Back</button>
+        <button class="btn-next" id="key-continue-btn" onclick="saveKeyAndContinue()" disabled style="opacity:0.4; cursor:not-allowed;">
+          Continue →
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════
+     SCREEN: RESUME UPLOAD
+════════════════════════ -->
+<div class="screen" id="screen-resume">
+  <div class="form-shell">
+
+    <div class="step-dots">
+      <div class="s-dot active"></div>
+      <div class="s-dot"></div><div class="s-dot"></div><div class="s-dot"></div>
+      <div class="s-dot"></div><div class="s-dot"></div><div class="s-dot"></div>
+    </div>
+
+    <div class="step-header">
+      <div class="step-label">
+        <div class="step-label-num">1</div>
+        Resume Upload
+      </div>
+      <h2 class="step-h">Start with your <em>story</em></h2>
+      <p class="step-sub">Your resume gives the AI crucial context — it anchors your answers to real experience, not aspirations.</p>
+    </div>
+
+    <!-- DROP ZONE -->
+    <div class="upload-zone" id="upload-zone" onclick="document.getElementById('resume-file').click()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+      <div class="upload-icon" id="upload-icon">📄</div>
+      <div class="upload-title" id="upload-title">Drop your resume here</div>
+      <div class="upload-sub" id="upload-sub">or click anywhere to browse</div>
+      <div class="upload-types">PDF · DOCX · TXT — up to 5MB</div>
+    </div>
+    <input type="file" id="resume-file" accept=".pdf,.docx,.txt,.doc" onchange="handleFileSelect(this)">
+
+    <!-- FILE PREVIEW -->
+    <div class="file-preview" id="file-preview">
+      <div class="file-icon-wrap">📎</div>
+      <div class="file-info">
+        <div class="file-name" id="file-name">resume.pdf</div>
+        <div class="file-size" id="file-size">0 KB</div>
+      </div>
+      <button class="file-remove" onclick="removeFile()" title="Remove file">✕</button>
+    </div>
+
+    <!-- PARSED KEYWORDS -->
+    <div class="resume-parsed" id="resume-parsed">
+      <div class="parsed-label">📍 Detected from your resume</div>
+      <div class="parsed-chips" id="parsed-chips"></div>
+    </div>
+
+    <div class="upload-alt">
+      <div class="upload-alt-line"></div>
+      <div class="upload-alt-text">or</div>
+      <div class="upload-alt-line"></div>
+    </div>
+
+    <div class="skip-note">
+      No resume ready? That's fine —
+      <a href="#" onclick="skipResume()" style="color:var(--accent-2); text-decoration:underline;">skip this step</a>
+      and we'll rely entirely on your answers. Results will still be meaningful.
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-back" onclick="goTo('screen-hero')">
+        <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><path d="M13 8H3M7 4L3 8l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Back
+      </button>
+      <button class="btn-next" onclick="goTo('screen-s1')">
+        Continue to questionnaire
+        <svg width="14" height="14" fill="none" viewBox="0 0 16 16"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════
+     SCREEN S1: Context
+════════════════════════ -->
+<div class="screen" id="screen-s1">
+  <div class="form-shell">
+    <div class="step-dots">
+      <div class="s-dot done"></div>
+      <div class="s-dot active"></div>
+      <div class="s-dot"></div><div class="s-dot"></div>
+      <div class="s-dot"></div><div class="s-dot"></div><div class="s-dot"></div>
+    </div>
+    <div class="step-header">
+      <div class="step-label"><div class="step-label-num">2</div>Section 1 of 6 — Where You Are</div>
+      <h2 class="step-h">Set the <em>scene</em></h2>
+      <p class="step-sub">Context calibrates everything. Give honest answers — not aspirational ones.</p>
+    </div>
+
+    <div class="q-card">
+      <div class="q-num">Q1</div>
+      <div class="q-text">Which best describes your current situation?</div>
+      <div class="radio-stack" id="q1" style="margin-top:0.75rem;">
+        <label class="r-opt" onclick="selR(this,'q1')"><input type="radio"><div class="r-bullet"></div><div><span class="r-label-main">High school student</span><span class="r-label-sub">Figuring out where I want to go</span></div></label>
+        <label class="r-opt" onclick="selR(this,'q1')"><input type="radio"><div class="r-bullet"></div><div><span class="r-label-main">College / university student</span><span class="r-label-sub">Studying, thinking about what's next</span></div></label>
+        <label class="r-opt" onclick="selR(this,'q1')"><input type="radio"><div class="r-bullet"></div><div><span class="r-label-main">Recent graduate (0–2 years out)</span><span class="r-label-sub">Just starting out</span></div></label>
+        <label class="r-opt" onclick="selR(this,'q1')"><input type="radio"><div class="r-bullet"></div><div><span class="r-label-main">Working professional — growing in place</span><span class="r-label-sub">Advancing within my current field</span></div></label>
+        <label class="r-opt" onclick="selR(this,'q1')"><input type="radio"><div class="r-bullet"></div><div><span class="r-label-main">Working professional — considering a switch</span><span class="r-label-sub">Something feels off; exploring alternatives</span></div></label>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="q-card">
+        <div class="q-num">Q2</div>
+        <div class="q-text">How old are you?</div>
+        <input type="number" class="q-input" id="q2" placeholder="e.g. 27" min="14" max="75" style="margin-top:0.75rem;">
+      </div>
+      <div class="q-card">
+        <div class="q-num">Q3</div>
+        <div class="q-text">Minimum annual salary you'd accept?</div>
+        <div class="q-hint">Your floor — not your dream.</div>
+        <input type="number" class="q-input" id="q3" placeholder="e.g. 65000">
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-num">Q4</div>
+      <div class="q-text">Financial runway right now?</div>
+      <div class="q-hint">How long could you sustain yourself without new income? Be honest.</div>
+      <div class="radio-stack" id="q4" style="margin-top:0.75rem;">
+        <label class="r-opt" onclick="selR(this,'q4')"><input type="radio"><div class="r-bullet"></div><span class="r-label-main">Under 1 month</span></label>
+        <label class="r-opt" onclick="selR(this,'q4')"><input type="radio"><div class="r-bullet"></div><span class="r-label-main">1–3 months</span></label>
+        <label class="r-opt" onclick="selR(this,'q4')"><input type="radio"><div class="r-bullet"></div><span class="r-label-main">3–6 months</span></label>
+        <label class="r-opt" onclick="selR(this,'q4')"><input type="radio"><div class="r-bullet"></div><span class="r-label-main">6–12 months</span></label>
+        <label class="r-opt" onclick="selR(this,'q4')"><input type="radio"><div class="r-bullet"></div><span class="r-label-main">12+ months</span></label>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-back" onclick="goTo('screen-resume')">← Back</button>
+      <button class="btn-next" onclick="goTo('screen-s2')">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════
+     SCREEN S2: Energy
+════════════════════════ -->
+<div class="screen" id="screen-s2">
+  <div class="form-shell">
+    <div class="step-dots">
+      <div class="s-dot done"></div><div class="s-dot done"></div>
+      <div class="s-dot active"></div>
+      <div class="s-dot"></div><div class="s-dot"></div><div class="s-dot"></div><div class="s-dot"></div>
+    </div>
+    <div class="step-header">
+      <div class="step-label"><div class="step-label-num">3</div>Section 2 of 6 — Energy Patterns</div>
+      <h2 class="step-h">What gives you <em>fuel</em></h2>
+      <p class="step-sub">Think about moments where time disappeared. What was actually happening?</p>
+    </div>
+
+    <div class="q-card">
+      <div class="q-num">Q5</div>
+      <div class="q-text">Describe the last time you were completely absorbed in a task. What were you doing?</div>
+      <div class="q-hint">Specific beats vague. "Debugging a CSS layout for 3 hours" is better than "doing something creative."</div>
+      <textarea class="q-textarea" id="q5" placeholder="e.g. I was mapping out a competitor analysis in a spreadsheet and kept pulling one more thread — 3 hours disappeared without me noticing…"></textarea>
+    </div>
+
+    <div class="q-card">
+      <div class="q-num">Q6</div>
+      <div class="q-text">Which types of problems feel genuinely satisfying to solve?</div>
+      <div class="q-hint">Pick all that feel true. Not what you think you "should" like.</div>
+      <div class="radio-stack" id="q6" style="margin-top:0.75rem;">
+        <label class="c-opt" onclick="selC(this)"><div class="c-box"></div><span>Figuring out why something broke and fixing it</span></label>
+        <label class="c-opt" onclick="selC(this)"><div class="c-box"></div><span>Making something unclear into something clear (writing, explaining, simplifying)</span></label>
+        <label class="c-opt" onclick="selC(this)"><div class="c-box"></div><span>Getting a group of people aligned on something complicated</span></label>
+        <label class="c-opt" onclick="selC(this)"><div class="c-box"></div><span>Optimizing a process so it runs faster or cheaper</span></label>
+        <label class="c-opt" onclick="selC(this)"><div class="c-box"></div><span>Finding patterns in data that others missed</span></label>
+        <label class="c-opt" onclick="selC(this)"><div class="c-box"></div><span>Creating something new from scratch that didn't exist before</span></label>
+        <label class="c-opt" onclick="selC(this)"><div class="c-box"></div><span>Helping a specific person work through their own problem</span></label>
+        <label class="c-opt" onclick="selC(this)"><div class="c-box"></div><span>Arguing or persuading — winning someone over through logic</span></label>
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-num">Q7</div>
+      <div class="q-text">What tasks reliably drain you — even when you're capable of doing them?</div>
+      <div class="q-hint">The stuff you avoid, procrastinate on, or feel weirdly depleted by after doing.</div>
+      <textarea class="q-textarea" id="q7" placeholder="e.g. Repetitive data entry, small talk in large groups, managing other people's emotions, following someone else's rigid process…"></textarea>
+    </div>
+
+    <div class="q-card">
+      <div class="q-num">Q8</div>
+      <div class="q-text">When you do your best work, are you mostly alone or with others?</div>
+      <div class="radio-stack" id="q8" style="margin-top:0.75rem;">
+        <label class="r-opt" onclick="selR(this,'q8')"><input type="radio"><div class="r-bullet"></div><div><span class="r-label-main">Alone</span><span class="r-label-sub">Deep focus, no interruptions</span></div></label>
+        <label class="r-opt" onclick="selR(this,'q8')"><input type="radio"><div class="r-bullet"></div><div><span class="r-label-main">Mostly alone, occasional check-ins</span><span class="r-label-sub">Independent but not isolated</span></div></label>
+        <label class="r-opt" onclick="selR(this,'q8')"><input type="radio"><div class="r-bullet"></div><div><span class="r-label-main">Genuine mix of both</span><span class="r-label-sub">Depends on the task</span></div></label>
+        <label class="r-opt" onclick="selR(this,'q8')"><input type="radio"><div class="r-bullet"></div><div><span class="r-label-main">Mostly with others</span><span class="r-label-sub">I think better out loud</span></div></label>
+        <label class="r-opt" onclick="selR(this,'q8')"><input type="radio"><div class="r-bullet"></div><div><span class="r-label-main">Always with others</span><span class="r-label-sub">Solo work kills my motivation</span></div></label>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-back" onclick="goTo('screen-s1')">← Back</button>
+      <button class="btn-next" onclick="goTo('screen-s3')">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════
+     SCREEN S3: Behavior
+════════════════════════ -->
+<div class="screen" id="screen-s3">
+  <div class="form-shell">
+    <div class="step-dots">
+      <div class="s-dot done"></div><div class="s-dot done"></div><div class="s-dot done"></div>
+      <div class="s-dot active"></div>
+      <div class="s-dot"></div><div class="s-dot"></div><div class="s-dot"></div>
+    </div>
+    <div class="step-header">
+      <div class="step-label"><div class="step-label-num">4</div>Section 3 of 6 — How You Actually Work</div>
+      <h2 class="step-h">Your <em>real</em> behavior</h2>
+      <p class="step-sub">Not how you wish you worked — what you actually do when left to your own devices.</p>
+    </div>
+
+    <div class="q-card">
+      <div class="q-num">Q9</div>
+      <div class="q-text">When you start something new with no instructions, what do you actually do?</div>
+      <div class="radio-stack" id="q9" style="margin-top:0.75rem;">
+        <label class="r-opt" onclick="selR(this,'q9')"><input type="radio"><div class="r-bullet"></div><div><span class="r-label-main">Dive in and figure it out</span><span class="r-label-sub">Trial and error is how I learn fastest</span></div></label>
+        <label class="r-opt" onclick="selR(this,'q9')"><input type="radio"><div class="r-bullet"></div><div><span class="r-label-main">Research first, then act</span><span class="r-label-sub">I want to understand the landscape before starting</span></div></label>
+        <label class="r-opt" onclick="selR(this,'q9')"><input type="radio"><div class="r-bullet"></div><div><span class="r-label-main">Find a framework or template to adapt</span><span class="r-label-sub">I like a structure to push against</span></div></label>
+        <label class="r-opt" onclick="selR(this,'q9')"><input type="radio"><div class="r-bullet"></div><div><span class="r-label-main">Ask someone who's done it before</span><span class="r-label-sub">Human guidance beats documentation</span></div></label>
+        <label class="r-opt" onclick="selR(this,'q9')"><input type="radio"><div class="r-bullet"></div><div><span class="r-label-main">Feel stuck until I get more clarity</span><span class="r-label-sub">Ambiguity genuinely slows me down</span></div></label>
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-num">Q10</div>
+      <div class="q-text">How do you actually respond to high-pressure situations (tight deadlines, high stakes)?</div>
+      <div class="radio-stack" id="q10" style="margin-top:0.75rem;">
+        <label class="r-opt" onclick="selR(this,'q10')"><input type="radio"><div class="r-bullet"></div><div><span class="r-label-main">I thrive</span><span class="r-label-sub">Pressure sharpens my focus and output quality</span></div></label>
+        <label class="r-opt" onclick="selR(this,'q10')"><input type="radio"><div class="r-bullet"></div><div><span class="r-label-main">I handle it but prefer a steady pace</span><span class="r-label-sub">I can do it, but it takes a real toll</span></div></label>
+        <label class="r-opt" onclick="selR(this,'q10')"><input type="radio"><div class="r-bullet"></div><div><span class="r-label-main">It depends on the source of the pressure</span><span class="r-label-sub">Some pressure energizes me; some doesn't</span></div></label>
+        <label class="r-opt" onclick="selR(this,'q10')"><input type="radio"><div class="r-bullet"></div><div><span class="r-label-main">I genuinely struggle</span><span class="r-label-sub">Pressure degrades my thinking or wellbeing</span></div></label>
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-num">Q11</div>
+      <div class="q-text">Rate yourself honestly on these.</div>
+      <div class="q-hint">1 = strongly disagree, 5 = strongly agree</div>
+      <div style="display:flex; flex-direction:column; gap:1.2rem; margin-top:0.75rem;">
+        <div>
+          <div style="font-size:0.88rem; font-weight:500; color:var(--text); margin-bottom:0.5rem;">"I prefer making my own decisions over being told what to do."</div>
+          <div class="scale-row" id="q11a">
+            <button class="scale-btn" onclick="selScale(this,'q11a')">1</button>
+            <button class="scale-btn" onclick="selScale(this,'q11a')">2</button>
+            <button class="scale-btn" onclick="selScale(this,'q11a')">3</button>
+            <button class="scale-btn" onclick="selScale(this,'q11a')">4</button>
+            <button class="scale-btn" onclick="selScale(this,'q11a')">5</button>
+          </div>
+          <div class="scale-labels"><span>Disagree</span><span>Agree</span></div>
+        </div>
+        <div>
+          <div style="font-size:0.88rem; font-weight:500; color:var(--text); margin-bottom:0.5rem;">"I do my best work when I have clear structure and expectations."</div>
+          <div class="scale-row" id="q11b">
+            <button class="scale-btn" onclick="selScale(this,'q11b')">1</button>
+            <button class="scale-btn" onclick="selScale(this,'q11b')">2</button>
+            <button class="scale-btn" onclick="selScale(this,'q11b')">3</button>
+            <button class="scale-btn" onclick="selScale(this,'q11b')">4</button>
+            <button class="scale-btn" onclick="selScale(this,'q11b')">5</button>
+          </div>
+          <div class="scale-labels"><span>Disagree</span><span>Agree</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-num">Q12</div>
+      <div class="q-text">When learning something new and motivated, how quickly do you feel competent?</div>
+      <div class="radio-stack" id="q12" style="margin-top:0.75rem;">
+        <label class="r-opt" onclick="selR(this,'q12')"><input type="radio"><div class="r-bullet"></div><div><span class="r-label-main">Weeks</span><span class="r-label-sub">I pick things up very fast when I'm into it</span></div></label>
+        <label class="r-opt" onclick="selR(this,'q12')"><input type="radio"><div class="r-bullet"></div><div><span class="r-label-main">A few months</span><span class="r-label-sub">Moderate ramp, steady progress</span></div></label>
+        <label class="r-opt" onclick="selR(this,'q12')"><input type="radio"><div class="r-bullet"></div><div><span class="r-label-main">Six months to a year</span><span class="r-label-sub">I go deep before I feel truly confident</span></div></label>
+        <label class="r-opt" onclick="selR(this,'q12')"><input type="radio"><div class="r-bullet"></div><div><span class="r-label-main">Varies a lot by domain</span></div></label>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-back" onclick="goTo('screen-s2')">← Back</button>
+      <button class="btn-next" onclick="goTo('screen-s4')">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════
+     SCREEN S4: Motivation
+════════════════════════ -->
+<div class="screen" id="screen-s4">
+  <div class="form-shell">
+    <div class="step-dots">
+      <div class="s-dot done"></div><div class="s-dot done"></div><div class="s-dot done"></div><div class="s-dot done"></div>
+      <div class="s-dot active"></div>
+      <div class="s-dot"></div><div class="s-dot"></div>
+    </div>
+    <div class="step-header">
+      <div class="step-label"><div class="step-label-num">5</div>Section 4 of 6 — What Moves You</div>
+      <h2 class="step-h">Real <em>motivation</em></h2>
+      <p class="step-sub">Not what sounds good in interviews. What genuinely drives your best work.</p>
+    </div>
+
+    <div class="q-card">
+      <div class="q-num">Q13</div>
+      <div class="q-text">Think of a project you're actually proud of. What made it satisfying — not the outcome, the experience?</div>
+      <div class="q-hint">Describe what was happening while you were in it. What felt good during the process itself?</div>
+      <textarea class="q-textarea" id="q13" placeholder="e.g. I had full ownership of the approach. I could see my decisions ripple through in real time. I was solving a problem nobody had cracked before…"></textarea>
+    </div>
+
+    <div class="q-card">
+      <div class="q-num">Q14</div>
+      <div class="q-text">Rank these motivators — most to least important to you personally.</div>
+      <div class="q-hint">Rank 1 = most important. Don't rank by what sounds noble.</div>
+      <div id="q14-ranks" style="margin-top:0.75rem;">
+        <div class="rank-item"><div class="rank-num">#1</div><select class="rank-select"><option value="">— Choose —</option><option>Compensation — earning well</option><option>Impact — making a real difference</option><option>Autonomy — control over my own work</option><option>Mastery — getting deeply good at something</option><option>Recognition — being seen and respected</option><option>Stability — predictability and security</option></select></div>
+        <div class="rank-item"><div class="rank-num">#2</div><select class="rank-select"><option value="">— Choose —</option><option>Compensation — earning well</option><option>Impact — making a real difference</option><option>Autonomy — control over my own work</option><option>Mastery — getting deeply good at something</option><option>Recognition — being seen and respected</option><option>Stability — predictability and security</option></select></div>
+        <div class="rank-item"><div class="rank-num">#3</div><select class="rank-select"><option value="">— Choose —</option><option>Compensation — earning well</option><option>Impact — making a real difference</option><option>Autonomy — control over my own work</option><option>Mastery — getting deeply good at something</option><option>Recognition — being seen and respected</option><option>Stability — predictability and security</option></select></div>
+        <div class="rank-item"><div class="rank-num">#4</div><select class="rank-select"><option value="">— Choose —</option><option>Compensation — earning well</option><option>Impact — making a real difference</option><option>Autonomy — control over my own work</option><option>Mastery — getting deeply good at something</option><option>Recognition — being seen and respected</option><option>Stability — predictability and security</option></select></div>
+        <div class="rank-item"><div class="rank-num">#5</div><select class="rank-select"><option value="">— Choose —</option><option>Compensation — earning well</option><option>Impact — making a real difference</option><option>Autonomy — control over my own work</option><option>Mastery — getting deeply good at something</option><option>Recognition — being seen and respected</option><option>Stability — predictability and security</option></select></div>
+        <div class="rank-item"><div class="rank-num">#6</div><select class="rank-select"><option value="">— Choose —</option><option>Compensation — earning well</option><option>Impact — making a real difference</option><option>Autonomy — control over my own work</option><option>Mastery — getting deeply good at something</option><option>Recognition — being seen and respected</option><option>Stability — predictability and security</option></select></div>
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-num">Q15</div>
+      <div class="q-text">Have you ever quit a job, project, or role? What finally made you leave?</div>
+      <div class="q-hint">If not — what would actually make you quit something you were otherwise good at?</div>
+      <textarea class="q-textarea" id="q15" placeholder="e.g. I left because every decision went through committee and nothing I built ever shipped. Good results felt hollow when someone else got final call…"></textarea>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-back" onclick="goTo('screen-s3')">← Back</button>
+      <button class="btn-next" onclick="goTo('screen-s5')">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════
+     SCREEN S5: Tradeoffs
+════════════════════════ -->
+<div class="screen" id="screen-s5">
+  <div class="form-shell">
+    <div class="step-dots">
+      <div class="s-dot done"></div><div class="s-dot done"></div><div class="s-dot done"></div><div class="s-dot done"></div><div class="s-dot done"></div>
+      <div class="s-dot active"></div>
+      <div class="s-dot"></div>
+    </div>
+    <div class="step-header">
+      <div class="step-label"><div class="step-label-num">6</div>Section 5 of 6 — Forced Choices</div>
+      <h2 class="step-h">What you'll actually <em>trade</em></h2>
+      <p class="step-sub">Every career involves tradeoffs. These forced choices reveal your real hierarchy — not your stated one.</p>
+    </div>
+
+    <div class="q-card">
+      <div class="q-num">Q16</div>
+      <div class="q-text">Which side of each tradeoff fits you better?</div>
+      <div style="display:flex; flex-direction:column; gap:1.5rem; margin-top:0.75rem;">
+
+        <div>
+          <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-3); font-weight:600; margin-bottom:0.5rem;">A — Pace vs. Pay</div>
+          <div class="radio-row" id="q16a">
+            <label class="r-opt" onclick="selR(this,'q16a')"><input type="radio"><div class="r-bullet"></div><div><span class="r-label-main">High pay, long hours, stressful</span></div></label>
+            <label class="r-opt" onclick="selR(this,'q16a')"><input type="radio"><div class="r-bullet"></div><div><span class="r-label-main">Moderate pay, sustainable pace, low stress</span></div></label>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-3); font-weight:600; margin-bottom:0.5rem;">B — Depth vs. Breadth</div>
+          <div class="radio-row" id="q16b">
+            <label class="r-opt" onclick="selR(this,'q16b')"><input type="radio"><div class="r-bullet"></div><div><span class="r-label-main">Specialist — deeply expert in one area</span></div></label>
+            <label class="r-opt" onclick="selR(this,'q16b')"><input type="radio"><div class="r-bullet"></div><div><span class="r-label-main">Generalist — broad skills, many domains</span></div></label>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-3); font-weight:600; margin-bottom:0.5rem;">C — Stability vs. Upside</div>
+          <div class="radio-row" id="q16c">
+            <label class="r-opt" onclick="selR(this,'q16c')"><input type="radio"><div class="r-bullet"></div><div><span class="r-label-main">Large company — stability, resources, slower pace</span></div></label>
+            <label class="r-opt" onclick="selR(this,'q16c')"><input type="radio"><div class="r-bullet"></div><div><span class="r-label-main">Startup — risk, high impact, fast pace</span></div></label>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-3); font-weight:600; margin-bottom:0.5rem;">D — Certainty vs. Potential</div>
+          <div class="radio-row" id="q16d">
+            <label class="r-opt" onclick="selR(this,'q16d')"><input type="radio"><div class="r-bullet"></div><div><span class="r-label-main">Known path, clear ceiling</span></div></label>
+            <label class="r-opt" onclick="selR(this,'q16d')"><input type="radio"><div class="r-bullet"></div><div><span class="r-label-main">Unknown path, higher potential</span></div></label>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-num">Q17</div>
+      <div class="q-text">What is the one thing you're genuinely unwilling to sacrifice in your next role?</div>
+      <div class="q-hint">There's usually one hard line. What is actually non-negotiable for you?</div>
+      <textarea class="q-textarea" id="q17" placeholder="e.g. I won't sacrifice autonomy. Even if it means a pay cut, I need to own my approach — not just execute someone else's…"></textarea>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-back" onclick="goTo('screen-s4')">← Back</button>
+      <button class="btn-next" onclick="goTo('screen-s6')">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════
+     SCREEN S6: Constraints
+════════════════════════ -->
+<div class="screen" id="screen-s6">
+  <div class="form-shell">
+    <div class="step-dots">
+      <div class="s-dot done"></div><div class="s-dot done"></div><div class="s-dot done"></div><div class="s-dot done"></div><div class="s-dot done"></div><div class="s-dot done"></div>
+      <div class="s-dot active"></div>
+    </div>
+    <div class="step-header">
+      <div class="step-label"><div class="step-label-num">7</div>Section 6 of 6 — Real Constraints</div>
+      <h2 class="step-h">The <em>edges</em> of what's possible</h2>
+      <p class="step-sub">Interests matter, but constraints define the solution space. Be precise.</p>
+    </div>
+
+    <div class="q-card">
+      <div class="q-num">Q18</div>
+      <div class="q-text">Where are you located / where are you willing to work?</div>
+      <input type="text" class="q-input" id="q18" placeholder="e.g. New York City, open to remote, not willing to relocate" style="margin-top:0.75rem;">
+    </div>
+
+    <div class="q-card">
+      <div class="q-num">Q19</div>
+      <div class="q-text">Work authorization status?</div>
+      <div class="radio-stack" id="q19" style="margin-top:0.75rem;">
+        <label class="r-opt" onclick="selR(this,'q19')"><input type="radio"><div class="r-bullet"></div><span class="r-label-main">Citizen or permanent resident — no restrictions</span></label>
+        <label class="r-opt" onclick="selR(this,'q19')"><input type="radio"><div class="r-bullet"></div><span class="r-label-main">Work visa (OPT, H-1B, etc.) — need sponsorship eventually</span></label>
+        <label class="r-opt" onclick="selR(this,'q19')"><input type="radio"><div class="r-bullet"></div><span class="r-label-main">Student visa — limited work rights</span></label>
+        <label class="r-opt" onclick="selR(this,'q19')"><input type="radio"><div class="r-bullet"></div><span class="r-label-main">Other / restricted</span></label>
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-num">Q20</div>
+      <div class="q-text">Hours per week you're available?</div>
+      <div class="radio-stack" id="q20" style="margin-top:0.75rem;">
+        <label class="r-opt" onclick="selR(this,'q20')"><input type="radio"><div class="r-bullet"></div><span class="r-label-main">Under 20 hrs — part-time or freelance only</span></label>
+        <label class="r-opt" onclick="selR(this,'q20')"><input type="radio"><div class="r-bullet"></div><span class="r-label-main">20–35 hrs — reduced full-time</span></label>
+        <label class="r-opt" onclick="selR(this,'q20')"><input type="radio"><div class="r-bullet"></div><span class="r-label-main">40 hrs — standard full-time</span></label>
+        <label class="r-opt" onclick="selR(this,'q20')"><input type="radio"><div class="r-bullet"></div><span class="r-label-main">50+ hrs — I'm open to demanding roles</span></label>
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-num">Q21</div>
+      <div class="q-text">Anything else that should factor in?</div>
+      <div class="q-hint">Caregiving, health, required industry, non-negotiable values, timing, anything real.</div>
+      <textarea class="q-textarea" id="q21" placeholder="e.g. I have two kids so commuting over 45 min is off the table. Also won't work in defense, tobacco, or fossil fuels regardless of pay…"></textarea>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-back" onclick="goTo('screen-s5')">← Back</button>
+      <button class="btn-next btn-submit" onclick="submitAll()">
+        ✦ Extract my signals
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════
+     SCREEN: LOADING
+════════════════════════ -->
+<div class="screen" id="screen-loading">
+  <div style="flex:1; display:flex; align-items:center; justify-content:center;">
+    <div class="loading-inner">
+      <div class="loading-orb"></div>
+      <div class="loading-h">Extracting your signals</div>
+      <div class="loading-sub">Analyzing resume + questionnaire responses…</div>
+
+      <div class="load-steps" id="load-steps">
+        <div class="load-step" id="lstep-1">
+          <div class="step-bullet">1</div>
+          <span>Processing resume context</span>
+        </div>
+        <div class="load-step" id="lstep-2">
+          <div class="step-bullet">2</div>
+          <span>Parsing questionnaire responses</span>
+        </div>
+        <div class="load-step" id="lstep-3">
+          <div class="step-bullet">3</div>
+          <span>Identifying energy & behavioral patterns</span>
+        </div>
+        <div class="load-step" id="lstep-4">
+          <div class="step-bullet">4</div>
+          <span>Inferring motivation drivers</span>
+        </div>
+        <div class="load-step" id="lstep-5">
+          <div class="step-bullet">5</div>
+          <span>Mapping tradeoffs & constraints</span>
+        </div>
+        <div class="load-step" id="lstep-6">
+          <div class="step-bullet">6</div>
+          <span>Assembling career signal profile</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════
+     SCREEN: RESULT
+════════════════════════ -->
+<div class="screen" id="screen-result">
+  <div class="result-wrap">
+
+    <div class="result-hero">
+      <div class="result-eyebrow">✦ Career Signal Profile</div>
+      <div class="result-h">Your signals, extracted.</div>
+      <div class="result-sub">Grounded in behavioral evidence — not generic categories or personality archetypes.</div>
+      <div id="conf-badge-wrap"></div>
+    </div>
+
+    <div id="result-body"></div>
+
+    <div class="profile-section" style="margin-top:0.5rem;">
+      <div class="section-head"><div class="section-head-label">Raw JSON — copy into your matching tool</div></div>
+      <div class="json-wrap">
+        <button class="copy-json-btn" onclick="copyJSON()">Copy</button>
+        <pre id="json-out"></pre>
+      </div>
+    </div>
+
+    <div class="result-actions">
+      <button class="btn-ghost" onclick="startOver()">Start over</button>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- /app-wrap -->
+
+<script>
+/* ══════════════════════
+   STATE
+══════════════════════ */
+const SCREENS = ['screen-hero','screen-apikey','screen-resume','screen-s1','screen-s2','screen-s3','screen-s4','screen-s5','screen-s6','screen-loading','screen-result'];
+const STEP_LABELS = ['Home','API Key','Resume Upload','Context','Energy','Behavior','Motivation','Tradeoffs','Constraints','Analyzing…','Profile'];
+const PROGRESS_PCT = [0,3,10,22,35,48,61,74,87,95,100];
+
+let resumeText = '';
+let rawJSON = '';
+let userApiKey = '';
+
+/* ══════════════════════
+   API KEY MANAGEMENT
+══════════════════════ */
+function validateKey(input) {
+  const val = input.value.trim();
+  const statusEl = document.getElementById('key-status');
+  const statusText = document.getElementById('key-status-text');
+  const continueBtn = document.getElementById('key-continue-btn');
+  const savedBadge = document.getElementById('key-saved-badge');
+
+  if (!val) {
+    input.classList.remove('valid','invalid');
+    statusEl.className = 'key-status idle';
+    statusText.textContent = 'Enter your key to continue';
+    continueBtn.disabled = true;
+    continueBtn.style.opacity = '0.4';
+    continueBtn.style.cursor = 'not-allowed';
+    savedBadge.classList.remove('show');
+    return;
+  }
+
+  const isValid = val.startsWith('sk-ant-') && val.length > 20;
+
+  if (isValid) {
+    input.classList.remove('invalid');
+    input.classList.add('valid');
+    statusEl.className = 'key-status valid';
+    statusText.textContent = '✓ Looks good — ready to continue';
+    continueBtn.disabled = false;
+    continueBtn.style.opacity = '1';
+    continueBtn.style.cursor = 'pointer';
+  } else {
+    input.classList.remove('valid');
+    input.classList.add('invalid');
+    statusEl.className = 'key-status invalid';
+    statusText.textContent = val.length < 10 ? 'Keep typing…' : 'Key should start with sk-ant-';
+    continueBtn.disabled = true;
+    continueBtn.style.opacity = '0.4';
+    continueBtn.style.cursor = 'not-allowed';
+    savedBadge.classList.remove('show');
+  }
+}
+
+function toggleKeyVisibility() {
+  const input = document.getElementById('api-key-input');
+  const btn = document.getElementById('key-toggle-btn');
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.textContent = '🙈';
+    btn.title = 'Hide key';
+  } else {
+    input.type = 'password';
+    btn.textContent = '👁';
+    btn.title = 'Show key';
+  }
+}
+
+function saveKeyAndContinue() {
+  const val = document.getElementById('api-key-input').value.trim();
+  if (!val.startsWith('sk-ant-') || val.length < 20) return;
+  userApiKey = val;
+  document.getElementById('key-saved-badge').classList.add('show');
+  setTimeout(() => goTo('screen-resume'), 400);
+}
+
+/* ══════════════════════
+   NAVIGATION
+══════════════════════ */
+function goTo(id) {
+  const fromEl = document.querySelector('.screen.active');
+  if (fromEl) fromEl.classList.remove('active');
+
+  const toEl = document.getElementById(id);
+  toEl.classList.add('active');
+
+  const idx = SCREENS.indexOf(id);
+  const showProgress = idx > 0;
+  const pill = document.getElementById('nav-pill');
+  pill.style.display = showProgress ? 'flex' : 'none';
+  if (showProgress) {
+    document.getElementById('nav-step-label').textContent = STEP_LABELS[idx];
+    document.getElementById('nav-progress-fill').style.width = PROGRESS_PCT[idx] + '%';
+  }
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ══════════════════════
+   FORM INTERACTIONS
+══════════════════════ */
+function selR(el, group) {
+  document.querySelectorAll(`#${group} .r-opt`).forEach(o => o.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+function selC(el) { el.classList.toggle('sel'); }
+
+function selScale(btn, group) {
+  document.querySelectorAll(`#${group} .scale-btn`).forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+}
+
+/* ══════════════════════
+   RESUME UPLOAD
+══════════════════════ */
+function handleDragOver(e) {
+  e.preventDefault();
+  document.getElementById('upload-zone').classList.add('dragover');
+}
+function handleDragLeave(e) {
+  document.getElementById('upload-zone').classList.remove('dragover');
+}
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('upload-zone').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) processFile(file);
+}
+function handleFileSelect(input) {
+  if (input.files[0]) processFile(input.files[0]);
+}
+
+function processFile(file) {
+  const allowedTypes = ['application/pdf','text/plain','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+  if (file.size > 5 * 1024 * 1024) { alert('File too large. Max 5MB.'); return; }
+
+  // Show preview
+  document.getElementById('file-name').textContent = file.name;
+  document.getElementById('file-size').textContent = formatSize(file.size);
+  document.getElementById('file-preview').classList.add('visible');
+
+  // Update zone
+  const zone = document.getElementById('upload-zone');
+  zone.classList.add('has-file');
+  zone.onclick = null;
+  document.getElementById('upload-icon').textContent = '✅';
+  document.getElementById('upload-title').textContent = 'Resume uploaded';
+  document.getElementById('upload-sub').textContent = 'Click × to remove and upload a different file';
+
+  // Read content
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const text = e.target.result;
+    resumeText = typeof text === 'string' ? text.slice(0, 3000) : '';
+    parseResumeKeywords(resumeText);
+  };
+
+  if (file.type === 'text/plain') {
+    reader.readAsText(file);
+  } else {
+    // For PDF/DOCX: use name as context signal
+    resumeText = `[Resume filename: ${file.name}] [File type: ${file.type}] [Note: Binary file — extract context from questionnaire answers]`;
+    reader.readAsText(file); // Will produce garbled text for PDF but that's ok — fallback to filename
+  }
+}
+
+function parseResumeKeywords(text) {
+  // Extract meaningful tokens from resume text
+  const keywords = [];
+  const skillPatterns = [
+    /python|javascript|react|node|sql|excel|java|typescript|figma|photoshop|tableau|salesforce|aws|gcp|azure|machine learning|data analysis|product management|ux|design|marketing|finance|accounting|consulting|engineering|healthcare|education/gi,
+    /\b(?:manager|director|analyst|engineer|designer|developer|consultant|specialist|coordinator|lead|senior|junior)\b/gi
+  ];
+
+  skillPatterns.forEach(pat => {
+    const matches = text.match(pat) || [];
+    matches.slice(0, 8).forEach(m => {
+      const clean = m.toLowerCase().trim();
+      if (!keywords.includes(clean) && clean.length > 2) keywords.push(clean);
+    });
+  });
+
+  if (keywords.length > 0) {
+    const chips = document.getElementById('parsed-chips');
+    chips.innerHTML = keywords.slice(0, 12).map(k => `<div class="parsed-chip">${k}</div>`).join('');
+    document.getElementById('resume-parsed').classList.add('visible');
+  }
+}
+
+function removeFile() {
+  resumeText = '';
+  document.getElementById('file-preview').classList.remove('visible');
+  document.getElementById('resume-parsed').classList.remove('visible');
+  const zone = document.getElementById('upload-zone');
+  zone.classList.remove('has-file', 'dragover');
+  zone.onclick = () => document.getElementById('resume-file').click();
+  document.getElementById('upload-icon').textContent = '📄';
+  document.getElementById('upload-title').textContent = 'Drop your resume here';
+  document.getElementById('upload-sub').textContent = 'or click anywhere to browse';
+  document.getElementById('resume-file').value = '';
+}
+
+function skipResume() {
+  resumeText = '';
+  goTo('screen-s1');
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+  return (bytes/1024/1024).toFixed(1) + ' MB';
+}
+
+/* ══════════════════════
+   COLLECT ANSWERS
+══════════════════════ */
+function getRadio(group) {
+  const sel = document.querySelector(`#${group} .r-opt.sel`);
+  if (!sel) return null;
+  return sel.querySelector('.r-label-main')?.textContent?.trim() || null;
+}
+
+function getChecks(group) {
+  return Array.from(document.querySelectorAll(`#${group} .c-opt.sel`))
+    .map(el => el.querySelector('span')?.textContent?.trim())
+    .filter(Boolean);
+}
+
+function getScale(group) {
+  const sel = document.querySelector(`#${group} .scale-btn.sel`);
+  return sel ? sel.textContent.trim() : null;
+}
+
+function getRanks() {
+  return Array.from(document.querySelectorAll('#q14-ranks .rank-item'))
+    .map((item, i) => {
+      const v = item.querySelector('select')?.value;
+      return v ? `#${i+1}: ${v}` : null;
+    }).filter(Boolean).join('; ');
+}
+
+function getVal(id) {
+  return document.getElementById(id)?.value?.trim() || null;
+}
+
+function buildAnswerBlock() {
+  return {
+    situation: getRadio('q1'),
+    age: getVal('q2'),
+    min_salary: getVal('q3'),
+    runway: getRadio('q4'),
+    flow_state_description: getVal('q5'),
+    satisfying_problem_types: getChecks('q6'),
+    draining_tasks: getVal('q7'),
+    solo_vs_social: getRadio('q8'),
+    new_task_approach: getRadio('q9'),
+    pressure_response: getRadio('q10'),
+    autonomy_scale: getScale('q11a'),
+    structure_scale: getScale('q11b'),
+    learning_velocity: getRadio('q12'),
+    proud_project_experience: getVal('q13'),
+    motivator_ranking: getRanks(),
+    quit_reason: getVal('q15'),
+    tradeoff_pace_vs_pay: getRadio('q16a'),
+    tradeoff_specialist_vs_generalist: getRadio('q16b'),
+    tradeoff_size_vs_impact: getRadio('q16c'),
+    tradeoff_certainty_vs_upside: getRadio('q16d'),
+    non_negotiable: getVal('q17'),
+    location: getVal('q18'),
+    work_auth: getRadio('q19'),
+    hours_available: getRadio('q20'),
+    other_constraints: getVal('q21')
+  };
+}
+
+/* ══════════════════════
+   PROMPT BUILDER
+══════════════════════ */
+function buildPrompt(answers) {
+  const resumeSection = resumeText
+    ? `\nRESUME CONTEXT (extracted from uploaded file):\n${resumeText.slice(0,2500)}\n`
+    : '\nRESUME: Not provided — rely entirely on questionnaire answers.\n';
+
+  const qa = Object.entries(answers).map(([k, v]) => {
+    if (Array.isArray(v)) return `${k}: ${v.join('; ') || '[not answered]'}`;
+    return `${k}: ${v || '[not answered]'}`;
+  }).join('\n');
+
+  return `You are a career signal extraction engine. Convert the following resume context and questionnaire responses into a structured Career Signal Profile.
+
+Your job: extract LATENT SIGNALS — what this person is actually drawn to, avoids, tolerates, and prioritizes — grounded in their specific answers. Do NOT suggest careers or give advice.
+${resumeSection}
+QUESTIONNAIRE RESPONSES:
+${qa}
+
+Return ONLY valid JSON matching this EXACT schema. No markdown, no preamble, no extra keys:
+
+{
+  "interest_signals": [
+    {"signal": string, "strength": 1|2|3|4|5, "evidence": string}
+  ],
+  "energy_profile": {
+    "energizing_patterns": string[],
+    "draining_patterns": string[]
+  },
+  "behavioral_preferences": {
+    "autonomy_preference": "low"|"medium"|"high",
+    "structure_preference": "low"|"medium"|"high",
+    "social_intensity": "low"|"medium"|"high",
+    "ambiguity_tolerance": "low"|"medium"|"high",
+    "pressure_tolerance": "low"|"medium"|"high"
+  },
+  "motivation_drivers": [
+    {"driver": string, "evidence": string}
+  ],
+  "avoidance_signals": [
+    {"signal": string, "evidence": string}
+  ],
+  "learning_velocity": "slow"|"moderate"|"fast",
+  "tradeoff_willingness": {
+    "willing_to_trade": string[],
+    "unwilling_to_trade": string[]
+  },
+  "constraints": {
+    "location": string|null,
+    "work_authorization": string|null,
+    "minimum_salary": number|null,
+    "hours_per_week_available": number|null,
+    "months_of_runway": number|null
+  },
+  "stage_context": {
+    "current_stage": "highschool"|"college"|"new_grad"|"career_switcher"|"working_professional"|null,
+    "age": number|null
+  },
+  "confidence": "low"|"medium"|"high",
+  "assumptions": string[]
+}
+
+RULES:
+- interest_signals: abstract behavioral patterns (e.g. "problem decomposition", "narrative communication") — never job titles
+- strength 4–5 only if reinforced by multiple answers
+- evidence must quote or closely reference the actual answer given
+- confidence: "high" requires 5+ cross-validated signals; "low" means fewer than 3 anchored signals
+- If resume context was provided, weave it into the evidence for relevant signals
+- Output ONLY valid JSON`;
+}
+
+/* ══════════════════════
+   SUBMIT + ANIMATE
+══════════════════════ */
+async function submitAll() {
+  const answers = buildAnswerBlock();
+  goTo('screen-loading');
+
+  // Animate loading steps
+  const stepsAnim = animateLoadingSteps();
+
+  try {
+    const prompt = buildPrompt(answers);
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': userApiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2500,
+        system: 'You are a career signal extraction engine. Output ONLY valid JSON. No markdown, no preamble, no commentary.',
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    await stepsAnim;
+
+    if (!res.ok) throw new Error(`API ${res.status}: ${res.statusText}`);
+
+    const data = await res.json();
+    const text = data.content.map(b => b.text || '').join('');
+    const clean = text.replace(/```json\n?|```/g, '').trim();
+    const profile = JSON.parse(clean);
+
+    rawJSON = clean;
+    renderResult(profile);
+    goTo('screen-result');
+
+  } catch (err) {
+    await stepsAnim;
+    rawJSON = `{"error": "${err.message}"}`;
+    document.getElementById('result-body').innerHTML = `<div class="err-box"><strong>Something went wrong.</strong><br>${err.message}<br><br>Make sure the API is accessible and try again.</div>`;
+    document.getElementById('conf-badge-wrap').innerHTML = '';
+    document.getElementById('json-out').innerHTML = err.message;
+    goTo('screen-result');
+  }
+}
+
+async function animateLoadingSteps() {
+  const steps = ['lstep-1','lstep-2','lstep-3','lstep-4','lstep-5','lstep-6'];
+  for (let i = 0; i < steps.length; i++) {
+    await delay(900 + i * 200);
+    const el = document.getElementById(steps[i]);
+    el.classList.add('show', 'active');
+    await delay(700);
+    el.classList.remove('active');
+    el.classList.add('done');
+    el.querySelector('.step-bullet').textContent = '✓';
+  }
+}
+
+const delay = ms => new Promise(r => setTimeout(r, ms));
+
+/* ══════════════════════
+   RENDER RESULT
+══════════════════════ */
+function renderResult(p) {
+  // Confidence badge
+  const confClass = { high:'conf-high', medium:'conf-medium', low:'conf-low' }[p.confidence] || 'conf-medium';
+  document.getElementById('conf-badge-wrap').innerHTML =
+    `<div class="conf-badge ${confClass}" style="margin-top:1rem;">● Confidence: ${p.confidence} · ${p.stage_context?.current_stage || 'unknown'} · Age: ${p.stage_context?.age || 'N/A'}</div>`;
+
+  let html = '';
+
+  // ── Interest Signals ──
+  if (p.interest_signals?.length) {
+    html += `<div class="profile-section">
+      <div class="section-head"><div class="section-head-label">Interest Signals</div></div>
+      ${p.interest_signals.map(s => `
+        <div class="signal-item">
+          <div class="sig-dots">${[1,2,3,4,5].map(i=>`<div class="sig-dot ${i<=s.strength?'on':''}"></div>`).join('')}</div>
+          <div class="sig-content">
+            <div class="sig-name">${s.signal}</div>
+            <div class="sig-ev">${s.evidence}</div>
+          </div>
+        </div>`).join('')}
+    </div>`;
+  }
+
+  // ── Energy Profile ──
+  const ep = p.energy_profile || {};
+  if (ep.energizing_patterns?.length || ep.draining_patterns?.length) {
+    html += `<div class="profile-section">
+      <div class="section-head"><div class="section-head-label">Energy Profile</div></div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+        <div>
+          <div style="font-size:0.72rem; text-transform:uppercase; letter-spacing:0.08em; font-weight:600; color:var(--green); margin-bottom:0.5rem;">Energizes</div>
+          <div class="tag-wrap">${(ep.energizing_patterns||[]).map(t=>`<span class="tag tag-green">${t}</span>`).join('')}</div>
+        </div>
+        <div>
+          <div style="font-size:0.72rem; text-transform:uppercase; letter-spacing:0.08em; font-weight:600; color:var(--red); margin-bottom:0.5rem;">Drains</div>
+          <div class="tag-wrap">${(ep.draining_patterns||[]).map(t=>`<span class="tag tag-red">${t}</span>`).join('')}</div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // ── Behavioral Preferences ──
+  const bp = p.behavioral_preferences || {};
+  const vel = p.learning_velocity;
+  if (Object.keys(bp).length) {
+    html += `<div class="profile-section">
+      <div class="section-head"><div class="section-head-label">Behavioral Preferences</div></div>
+      <div class="beh-grid">
+        ${Object.entries(bp).map(([k,v])=>`<div class="beh-item"><div class="beh-key">${k.replace(/_/g,' ')}</div><div class="beh-val">${v}</div></div>`).join('')}
+      </div>
+      ${vel ? `<div style="margin-top:0.75rem; display:flex; align-items:center; gap:0.6rem;"><div style="font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-3); font-weight:500;">Learning velocity</div><span class="tag tag-purple">${vel}</span></div>` : ''}
+    </div>`;
+  }
+
+  // ── Motivation Drivers ──
+  if (p.motivation_drivers?.length) {
+    html += `<div class="profile-section">
+      <div class="section-head"><div class="section-head-label">Motivation Drivers</div></div>
+      ${p.motivation_drivers.map(m=>`
+        <div class="motiv-item">
+          <div class="motiv-driver">${m.driver}</div>
+          <div class="motiv-ev">${m.evidence}</div>
+        </div>`).join('')}
+    </div>`;
+  }
+
+  // ── Avoidance Signals ──
+  if (p.avoidance_signals?.length) {
+    html += `<div class="profile-section">
+      <div class="section-head"><div class="section-head-label">Avoidance Signals</div></div>
+      ${p.avoidance_signals.map(a=>`
+        <div class="avoid-item">
+          <div class="avoid-sig">${a.signal}</div>
+          <div class="avoid-ev">${a.evidence}</div>
+        </div>`).join('')}
+    </div>`;
+  }
+
+  // ── Tradeoff Willingness ──
+  const tw = p.tradeoff_willingness || {};
+  if (tw.willing_to_trade?.length || tw.unwilling_to_trade?.length) {
+    html += `<div class="profile-section">
+      <div class="section-head"><div class="section-head-label">Tradeoff Willingness</div></div>
+      <div class="trade-grid">
+        <div>
+          <div class="trade-col-head trade-dim" style="color:var(--text-2);">Willing to give up</div>
+          <div class="tag-wrap">${(tw.willing_to_trade||[]).map(t=>`<span class="tag tag-dim">${t}</span>`).join('')}</div>
+        </div>
+        <div>
+          <div class="trade-col-head trade-red">Won't sacrifice</div>
+          <div class="tag-wrap">${(tw.unwilling_to_trade||[]).map(t=>`<span class="tag tag-red">${t}</span>`).join('')}</div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // ── Constraints ──
+  const c = p.constraints || {};
+  const cRows = [
+    ['Location', c.location],
+    ['Work authorization', c.work_authorization],
+    ['Minimum salary', c.minimum_salary != null ? '$' + Number(c.minimum_salary).toLocaleString() : null],
+    ['Hours / week', c.hours_per_week_available],
+    ['Runway (months)', c.months_of_runway],
+  ].filter(([,v]) => v != null && v !== 'null');
+
+  if (cRows.length) {
+    html += `<div class="profile-section">
+      <div class="section-head"><div class="section-head-label">Hard Constraints</div></div>
+      ${cRows.map(([k,v]) => `<div class="con-row"><span class="con-key">${k}</span><span class="con-val">${v}</span></div>`).join('')}
+    </div>`;
+  }
+
+  // ── Assumptions ──
+  if (p.assumptions?.length) {
+    html += `<div class="profile-section">
+      <div class="section-head"><div class="section-head-label">Assumptions Made</div></div>
+      <ul class="assum-list">${p.assumptions.map(a=>`<li>${a}</li>`).join('')}</ul>
+    </div>`;
+  }
+
+  document.getElementById('result-body').innerHTML = html;
+
+  // Render JSON
+  try {
+    const pretty = JSON.parse(rawJSON);
+    document.getElementById('json-out').innerHTML = syntaxHL(pretty);
+  } catch {
+    document.getElementById('json-out').textContent = rawJSON;
+  }
+}
+
+function syntaxHL(json) {
+  const str = JSON.stringify(json, null, 2);
+  return str.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, m => {
+    if (/^"/.test(m)) {
+      if (/:$/.test(m)) return `<span class="jk">${m}</span>`;
+      return `<span class="js">${m}</span>`;
+    }
+    if (/true|false/.test(m) || m === 'null') return `<span class="jb">${m}</span>`;
+    return `<span class="jn">${m}</span>`;
+  });
+}
+
+function copyJSON() {
+  navigator.clipboard.writeText(rawJSON || '{}').then(() => {
+    const btn = document.querySelector('.copy-json-btn');
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+}
+
+function startOver() {
+  // Reset all form state
+  document.querySelectorAll('.r-opt.sel').forEach(el => el.classList.remove('sel'));
+  document.querySelectorAll('.c-opt.sel').forEach(el => el.classList.remove('sel'));
+  document.querySelectorAll('.scale-btn.sel').forEach(el => el.classList.remove('sel'));
+  document.querySelectorAll('textarea, input[type="text"], input[type="number"]').forEach(el => el.value = '');
+  document.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+
+  // Reset loading steps
+  for (let i = 1; i <= 6; i++) {
+    const el = document.getElementById(`lstep-${i}`);
+    el.classList.remove('show','active','done');
+    el.querySelector('.step-bullet').textContent = i;
+  }
+
+  removeFile();
+  resumeText = '';
+  rawJSON = '';
+  document.getElementById('result-body').innerHTML = '';
+  document.getElementById('conf-badge-wrap').innerHTML = '';
+
+  // Keep the API key in memory — user doesn't need to re-enter for another run
+  // But go to hero so they can start fresh naturally
+  goTo('screen-hero');
+}
+</script>
+</body>
+</html>
